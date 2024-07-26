@@ -1,7 +1,10 @@
 package com.papajohns.pj_app.Controllers;
 
+import com.papajohns.pj_app.Models.DTO.CreateDTO.ProductAttributeDTO;
 import com.papajohns.pj_app.Models.DTO.CreateDTO.ProductCreateDTO;
+import com.papajohns.pj_app.Models.DTO.ProductDTO;
 import com.papajohns.pj_app.Models.DTO.ResponseDTO.ProductResponseDTO;
+import com.papajohns.pj_app.Models.Product;
 import com.papajohns.pj_app.Services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,5 +53,30 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{productId}/attributes")
+    public ProductDTO addAttributeToProduct(@PathVariable UUID productId, @RequestBody ProductAttributeDTO attributeDTO) {
+        return productService.addAttributeToProduct(productId, attributeDTO);
+    }
+
+    @PutMapping("/{productId}/attributes/{attributeId}")
+    public ProductDTO updateAttributeInProduct(@PathVariable UUID productId, @PathVariable Long attributeId, @RequestBody ProductAttributeDTO attributeDTO) {
+        return productService.updateAttributeInProduct(productId, attributeId, attributeDTO);
+    }
+
+    @GetMapping("/{productId}/attributes")
+    public List<ProductAttributeDTO> getAttributesByProductId(@PathVariable UUID productId) {
+        return productService.getAttributesByProductId(productId);
+    }
+
+    @GetMapping("/{productId}/attributes/{attributeId}")
+    public ProductAttributeDTO getAttributeById(@PathVariable UUID productId, @PathVariable Long attributeId) {
+        return productService.getAttributeById(productId, attributeId);
+    }
+
+    @DeleteMapping("/{productId}/attributes/{attributeId}")
+    public void deleteAttributeById(@PathVariable UUID productId, @PathVariable Long attributeId) {
+        productService.deleteAttributeById(productId, attributeId);
     }
 }

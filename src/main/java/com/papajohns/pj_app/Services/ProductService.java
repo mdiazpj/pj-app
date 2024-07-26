@@ -1,8 +1,13 @@
 package com.papajohns.pj_app.Services;
 
+import com.papajohns.pj_app.Models.DTO.CreateDTO.ProductAttributeDTO;
 import com.papajohns.pj_app.Models.DTO.CreateDTO.ProductCreateDTO;
+import com.papajohns.pj_app.Models.DTO.CreateDTO.ProductOptionDTO;
+import com.papajohns.pj_app.Models.DTO.ProductDTO;
 import com.papajohns.pj_app.Models.DTO.ResponseDTO.ProductResponseDTO;
 import com.papajohns.pj_app.Models.Product;
+import com.papajohns.pj_app.Models.ProductAttribute;
+import com.papajohns.pj_app.Models.ProductOption;
 import com.papajohns.pj_app.Repositories.CategoryRepository;
 import com.papajohns.pj_app.Repositories.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -110,5 +115,145 @@ public class ProductService {
         responseDTO.setCategory(categoryDTO);
 
         return responseDTO;
+    }
+
+    public ProductDTO addAttributeToProduct(UUID productId, ProductAttributeDTO attributeDTO) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found with id " + productId));
+
+        ProductAttribute attribute = new ProductAttribute();
+        attribute.setTitle(attributeDTO.getTitle());
+        attribute.setWithPrice(attributeDTO.isWithPrice());
+        attribute.setMin(attributeDTO.getMin());
+        attribute.setMax(attributeDTO.getMax());
+        attribute.setEnabled(attributeDTO.isEnabled());
+        attribute.setRequired(attributeDTO.isRequired());
+        attribute.setSelectSameOption(attributeDTO.isSelectSameOption());
+
+        attribute.setOptions(attributeDTO.getOptions().stream().map(optionDTO -> {
+            ProductOption option = new ProductOption();
+            option.setId(optionDTO.getId()); // Asignación manual del ID
+            option.setTitle(optionDTO.getTitle());
+            option.setImageUrl(optionDTO.getImageUrl());
+            option.setEnabled(optionDTO.isEnabled());
+            option.setPrice(optionDTO.getPrice());
+            return option;
+        }).collect(Collectors.toList()));
+
+        product.getAttributes().add(attribute);
+        product = productRepository.save(product);
+        return mapToProductDTO(product);
+    }
+
+    public ProductDTO updateAttributeInProduct(UUID productId, Long attributeId, ProductAttributeDTO attributeDTO) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found with id " + productId));
+
+        ProductAttribute attribute = product.getAttributes().stream().filter(attr -> attr.getId().equals(attributeId))
+                .findFirst().orElseThrow(() -> new RuntimeException("Attribute not found with id " + attributeId));
+
+        attribute.setTitle(attributeDTO.getTitle());
+        attribute.setWithPrice(attributeDTO.isWithPrice());
+        attribute.setMin(attributeDTO.getMin());
+        attribute.setMax(attributeDTO.getMax());
+        attribute.setEnabled(attributeDTO.isEnabled());
+        attribute.setRequired(attributeDTO.isRequired());
+        attribute.setSelectSameOption(attributeDTO.isSelectSameOption());
+
+        // Actualizar las opciones existentes
+        attribute.getOptions().clear();
+        attribute.getOptions().addAll(attributeDTO.getOptions().stream().map(optionDTO -> {
+            ProductOption option = new ProductOption();
+            option.setId(optionDTO.getId()); // Asignación manual del ID
+            option.setTitle(optionDTO.getTitle());
+            option.setImageUrl(optionDTO.getImageUrl());
+            option.setEnabled(optionDTO.isEnabled());
+            option.setPrice(optionDTO.getPrice());
+            return option;
+        }).collect(Collectors.toList()));
+
+        product = productRepository.save(product);
+        return mapToProductDTO(product);
+    }
+
+    private ProductDTO mapToProductDTO(Product product) {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setId(product.getId());
+        productDTO.setPrice(product.getPrice());
+        productDTO.setTitle(product.getTitle());
+        productDTO.setDescription(product.getDescription());
+        productDTO.setOrderIndex(product.getOrderIndex());
+        productDTO.setEnabled(product.isEnabled());
+        productDTO.setUpselling(product.isUpselling());
+        productDTO.setImageUrls(product.getImageUrls());
+        productDTO.setCategoryId(product.getCategory().getId());
+
+        productDTO.setAttributes(product.getAttributes().stream().map(attribute -> {
+            ProductAttributeDTO attributeDTO = new ProductAttributeDTO();
+            attributeDTO.setId(attribute.getId());
+            attributeDTO.setTitle(attribute.getTitle());
+            attributeDTO.setWithPrice(attribute.isWithPrice());
+            attributeDTO.setMin(attribute.getMin());
+            attributeDTO.setMax(attribute.getMax());
+            attributeDTO.setEnabled(attribute.isEnabled());
+            attributeDTO.setRequired(attribute.isRequired());
+            attributeDTO.setSelectSameOption(attribute.isSelectSameOption());
+
+            attributeDTO.setOptions(attribute.getOptions().stream().map(option -> {
+                ProductOptionDTO optionDTO = new ProductOptionDTO();
+                optionDTO.setId(option.getId());
+                optionDTO.setTitle(option.getTitle());
+                optionDTO.setImageUrl(option.getImageUrl());
+                optionDTO.setEnabled(option.isEnabled());
+                optionDTO.setPrice(option.getPrice());
+                return optionDTO;
+            }).collect(Collectors.toList()));
+
+            return attributeDTO;
+        }).collect(Collectors.toList()));
+
+        return productDTO;
+    }
+
+    public List<ProductAttributeDTO> getAttributesByProductId(UUID productId) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found with id " + productId));
+        return product.getAttributes().stream().map(this::mapToProductAttributeDTO).collect(Collectors.toList());
+    }
+
+    public ProductAttributeDTO getAttributeById(UUID productId, Long attributeId) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found with id " + productId));
+        ProductAttribute attribute = product.getAttributes().stream().filter(attr -> attr.getId().equals(attributeId))
+                .findFirst().orElseThrow(() -> new RuntimeException("Attribute not found with id " + attributeId));
+        return mapToProductAttributeDTO(attribute);
+    }
+
+    public void deleteAttributeById(UUID productId, Long attributeId) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found with id " + productId));
+        ProductAttribute attribute = product.getAttributes().stream().filter(attr -> attr.getId().equals(attributeId))
+                .findFirst().orElseThrow(() -> new RuntimeException("Attribute not found with id " + attributeId));
+        product.getAttributes().remove(attribute);
+        productRepository.save(product);
+    }
+
+    private ProductAttributeDTO mapToProductAttributeDTO(ProductAttribute attribute) {
+        ProductAttributeDTO attributeDTO = new ProductAttributeDTO();
+        attributeDTO.setId(attribute.getId());
+        attributeDTO.setTitle(attribute.getTitle());
+        attributeDTO.setWithPrice(attribute.isWithPrice());
+        attributeDTO.setMin(attribute.getMin());
+        attributeDTO.setMax(attribute.getMax());
+        attributeDTO.setEnabled(attribute.isEnabled());
+        attributeDTO.setRequired(attribute.isRequired());
+        attributeDTO.setSelectSameOption(attribute.isSelectSameOption());
+
+        attributeDTO.setOptions(attribute.getOptions().stream().map(option -> {
+            ProductOptionDTO optionDTO = new ProductOptionDTO();
+            optionDTO.setId(option.getId());
+            optionDTO.setTitle(option.getTitle());
+            optionDTO.setImageUrl(option.getImageUrl());
+            optionDTO.setEnabled(option.isEnabled());
+            optionDTO.setPrice(option.getPrice());
+            return optionDTO;
+        }).collect(Collectors.toList()));
+
+        return attributeDTO;
     }
 }
