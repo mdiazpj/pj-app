@@ -1,4 +1,4 @@
-[Pj-totem.postman_collection.json](https://github.com/user-attachments/files/16394406/Pj-totem.postman_collection.json)# 🚀 Proyecto de Spring Boot
+# 🚀 Proyecto de Spring Boot
 
 Este proyecto es una aplicación CRUD de Spring Boot que maneja la lógica de productos con sus atributos y se conecta a una base de datos MySQL.
 ## 🛠️ Prerrequisitos
