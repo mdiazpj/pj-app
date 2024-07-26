@@ -48,7 +48,7 @@ El backend estará disponible en `http://localhost:8080`.
 
 Para facilitar las pruebas de los endpoints de la API, hemos creado una colección de Postman. Puedes descargarla desde el siguiente enlace:
 
-[📥 Descargar Colección de Postman]([ruta/al/archivo/postman_collection.json](https://pjespana-my.sharepoint.com/:u:/g/personal/manolo_diaz_pjchile_com/Ed0fef-fSfZHqtJS7b8S8ekByN1n8eVR_v7CqPe4Vkheyg?e=EHI2Ee))
+[📥 Descargar Colección de Postman](https://pjespana-my.sharepoint.com/:u:/g/personal/manolo_diaz_pjchile_com/Ed0fef-fSfZHqtJS7b8S8ekByN1n8eVR_v7CqPe4Vkheyg?e=EHI2Ee)
 
 ## 📧 Contacto
 
